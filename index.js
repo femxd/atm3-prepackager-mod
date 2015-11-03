@@ -14,7 +14,7 @@ module.exports = function(ret, conf, settings, opt) {
 
     _.each(_.find(confHash.modpath, 'img/**', 'publish/**'), function(imgpath) {
         // console.log(imgpath, 'e:/testtc/img/' + imgpath.split('/img/')[1])
-        _.copy(imgpath, 'e:/testtc/img/' + imgpath.split('/img/')[1], '', '*.psd', true, false)
+        _.copy(imgpath, confHash.modProject + imgpath.split('/img/')[1], '', '*.psd', true, false)
     })
     parseDir(ret)
 
