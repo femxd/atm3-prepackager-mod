@@ -1,6 +1,6 @@
 {
   "name": "atm3-prepackager-mod",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "atm3 mod plugin",
   "main": "index.js",
   "scripts": {
