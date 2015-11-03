@@ -1,6 +1,6 @@
 {
   "name": "atm3-prepackager-mod",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "atm3 mod plugin",
   "main": "index.js",
   "scripts": {
@@ -14,10 +14,18 @@
     "atm3",
     "plugin"
   ],
-  "author": "monkeytao",
+  "author": {
+    "name": "monkeytao"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/femxd/atm3-prepackager-mod/issues"
   },
-  "homepage": "https://github.com/femxd/atm3-prepackager-mod#readme"
+  "homepage": "https://github.com/femxd/atm3-prepackager-mod#readme",
+  "readme": "# atm3-prepackager-mod\r\n\r\n组件文件夹---模块处理--->项目文件夹\r\n",
+  "readmeFilename": "README.md",
+  "gitHead": "810bd393c248fad437deba5fd1bdad29d6bc299e",
+  "_id": "atm3-prepackager-mod@0.0.3",
+  "_shasum": "bfece09d4f0c68553f55d8186514a23a5d25ec18",
+  "_from": "atm3-prepackager-mod@0.0.3"
 }

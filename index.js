@@ -14,7 +14,7 @@ module.exports = function(ret, conf, settings, opt) {
 
     _.each(_.find(confHash.modpath, 'img/**', 'publish/**'), function(imgpath) {
         // console.log(imgpath, 'e:/testtc/img/' + imgpath.split('/img/')[1])
-        _.copy(imgpath, confHash.modProject + imgpath.split('/img/')[1], '', '*.psd', true, false)
+        _.copy(imgpath, path.resolve(confHash.modProject, 'img', imgpath.split('/img/')[1]), '', '*.psd', true, false)
     })
     parseDir(ret)
 
@@ -54,7 +54,7 @@ var parseHtml = function(htmlPath, htmlconent) {
 
 var parseProject = function(htmlHash, modSource) {
     // console.log(modSource, 123)
-    var modRe = /<!--[\S\s]*?-->|<meta\s+name\s*=\s*(["'])sub\1\s+content\s*=\s*(["'])(.+?)\2>/g
+    var modRe = /<!--[\S\s]*?-->|<meta\s+name\s*=\s*(["'])sub\1\s+content\s*=\s*(["'])(.+?)\2\s*\/*>/g
     modSource.replace(modRe, function(m0, m1, m2, m3, m4, m5, m6) {
         // console.log(m3)
         // console.log(m3.split(/[,\s\xA0]+/g))
@@ -90,7 +90,9 @@ var parseMod = function(htmlHash, modSource) {
 var makeData = function() {
     // console.log(confHash.htmlData)
     _.each(confHash.htmlData, function(htmlHash, htmlPath) {
-        // console.log(htmlHash, htmlPath)
+        // if ()
+        // console.log(htmlPath, htmlHash.modDep)
+        // console.log(htmlPath, htmlHash.modList.join('\n'))
         _.each(htmlHash.modDep, function(v, k) {
             confHash.subData[v] = confHash.subData[v] || []
             confHash.subData[v] = _.union(confHash.subData[v], htmlHash.modList)
