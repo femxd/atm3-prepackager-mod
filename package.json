@@ -1,0 +1,23 @@
+{
+  "name": "atm3-prepackager-mod",
+  "version": "0.0.1",
+  "description": "atm3 mod plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/femxd/atm3-prepackager-mod.git"
+  },
+  "keywords": [
+    "atm3",
+    "plugin"
+  ],
+  "author": "monkeytao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/femxd/atm3-prepackager-mod/issues"
+  },
+  "homepage": "https://github.com/femxd/atm3-prepackager-mod#readme"
+}
