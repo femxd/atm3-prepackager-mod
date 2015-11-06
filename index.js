@@ -126,8 +126,11 @@ var makeProject = function() {
                 fis.log.info('mod not found', deppath)
             }
         })
-        // fis.log.info(path.resolve(confHash.modProject, confHash.modsub[modName]))
-        _.write(path.resolve(confHash.modProject, confHash.modsub[modName]), result.join('\n'))
+
+        // fis.log.info(confHash.modProject)
+        if (confHash.modsub[modName]) {
+            _.write(path.resolve(confHash.modProject, confHash.modsub[modName]), result.join('\n'))
+        }
     })
 }
 
