@@ -1,6 +1,6 @@
 {
   "name": "atm3-prepackager-mod",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "atm3 mod plugin",
   "main": "index.js",
   "scripts": {
@@ -25,7 +25,7 @@
   "readme": "# atm3-prepackager-mod\r\n\r\n组件文件夹---模块处理--->项目文件夹\r\n",
   "readmeFilename": "README.md",
   "gitHead": "810bd393c248fad437deba5fd1bdad29d6bc299e",
-  "_id": "atm3-prepackager-mod@0.0.3",
-  "_shasum": "bfece09d4f0c68553f55d8186514a23a5d25ec18",
-  "_from": "atm3-prepackager-mod@0.0.3"
+  "_id": "atm3-prepackager-mod@0.0.5",
+  "_shasum": "9ea3330a41e81ecf0e35d39eabb01a6d493b24a5",
+  "_from": "atm3-prepackager-mod@0.0.5"
 }

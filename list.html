@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> sub.html.mod </title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, minimum-scale=1, maximum-scale=1">
+        <meta charset="utf-8" author="the FEteam at (MIG research and development department) with love." coder="monkeytao" design="copy from PC weixin Client">
+
+        <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAADtUExURQAAAENEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ+bMkoIAAABOdFJOUwAH5+0M84f3FxL4kBj0/vKOhUECBk2NQAQZ9Q4BNsLuguGJSDmUg8yM60c1RZbPxDgzDyfAys2EHfop7zSKCx/GEfmL9h7pJOUIww3o8ToRooMAAADuSURBVDjL7ZLHdsIwEEVFgjGSbQyh9xIIpFBT6KFDKJn//xwGJBsdw9or3uqOdM9odCRCXMmzVvOJaKUILrxoJw7WP4RQgUuKCULeBb8+CSEmCVGsvwS/WUdol/0GliPBVXsGH2MpFsClvoFNMzmkucHUuC14dZ2u1gDLQQerNKrmZpb0O67yB5BKnGCfB/i/vqrnAUDVz/0eARR6W/DfBTeEgy3gY5nXj7VllpDG72BOfimlnz1JyOwsITxFwxgqivrTlltkLYG05P8pJQcBnVOT7387psAWSU5lLsSdc44XXg7hQjAUinUjxKUcAT0EP1vp32kPAAAAAElFTkSuQmCC">
+        <script>
+var data = __DATA__
+        </script>
+
+        <style>
+          ._dbox{
+            display: -webkit-box;
+          }
+          ._dboxf {
+            -webkit-box-flex: 1;
+          }
+          ._dboxa {
+            -webkit-box-align: center;
+          }
+          ._dboxp {
+            -webkit-box-pack: center;
+          }
+          ._dboxv {
+            -webkit-box-orient: vertical;
+          }
+          ._dbox > ._dboxf {
+            width: 1%;
+            height: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          html, body, body > div {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+          }
+          select {
+            width: 100%;
+            height: 80%;
+          }
+        </style>
+    </head>
+    <body>
+      <div class="_dbox" id="panel">
+        <div class="_dboxf">
+          <select v-model="subselecting" v-on:click="click('subselecting')" multiple>
+            <option v-for="subitem in sub" v-text="subitem"></option>
+          </select>
+        </div>
+        <div class="_dboxf">
+          <select v-model="htmlselecting" v-on:click="click('htmlselecting')" multiple>
+            <option v-for="htmlitem in html" v-text="htmlitem"></option>
+          </select>
+        </div>
+        <div class="_dboxf">
+          <select v-model="modselecting" v-on:click="click('modselecting')" multiple>
+            <option v-for="moditem in mod" v-text="moditem"></option>
+          </select>
+        </div>
+      </div>
+      <script src="https://cdn.bootcss.com/vue/1.0.4/vue.min.js"></script>
+      <script src="https://cdn.bootcss.com/jquery/3.0.0-alpha1/jquery.min.js"></script>
+      <script src="https://cdn.bootcss.com/lodash.js/3.10.1/lodash.min.js"></script>
+      <script src="http://7xj21u.com1.z0.glb.clouddn.com/cdn/debug.js"></script>
+      <script>
+        // console.log(_)
+        // console.log(jQuery)
+        // console.log(debug)
+        debug.enable('*')
+        var log = debug('list.html')
+        // log(data)
+
+        var newData = {}
+        var newDataRelation = {}
+        newDataRelation.subhtml = []
+        newDataRelation.modhtml = []
+        newDataRelation.submod = []
+
+        newData.sub = []
+        newData.html = []
+        newData.mod = []
+        newData.subselecting = []
+        newData.htmlselecting = []
+        newData.modselecting = []
+        newData.from = null
+
+        _.each(data.sub, function(v, k) {
+          newData.sub.push(k)
+        })
+
+        _.each(data.html, function(v, k) {
+          newData.html.push(k)
+
+          _.each(v.modDep, function(vv, kk) {
+            newDataRelation.subhtml.push([vv, k])
+
+          })
+
+          _.each(v.modList, function(vv, kk) {
+            newData.mod.push(vv)
+
+            newDataRelation.modhtml.push([vv, k])
+
+            _.each(v.modDep, function(vvv, kkk) {
+              newDataRelation.submod.push([vvv, vv])
+            })
+          })
+        })
+
+        newData.mod = _.uniq(newData.mod)
+
+        newDataRelation.subhtml = _.uniq(newDataRelation.subhtml)
+        newDataRelation.modhtml = _.uniq(newDataRelation.modhtml)
+        newDataRelation.submod = _.uniq(newDataRelation.submod)
+
+        // log(newData)
+        log(newDataRelation)
+
+        var vm = new Vue({
+          el: '#panel',
+          data: newData,
+          methods: {
+            click: function(from) {
+              var resulta = []
+              var resultb = []
+
+              var fn01 = function(a, v) {
+                return _.filter(a, function(vv, kk) {
+                  return vv[0] === v
+                }).map(function(vv, kk) {
+                  return vv[1]
+                })
+              }
+              var fn10 = function(a, v) {
+                return _.filter(a, function(vv, kk) {
+                  return vv[1] === v
+                }).map(function(vv, kk) {
+                  return vv[0]
+                })
+              }
+
+              var fromobj = {
+                subselecting: [
+                  'subhtml', fn01,
+                  'submod',  fn01,
+                  function() {
+                    this.htmlselecting = resulta
+                    this.modselecting = resultb
+                  },
+                ],
+                htmlselecting: [
+                  'subhtml', fn10,
+                  'modhtml', fn10,
+                  function() {
+                    this.subselecting = resulta
+                    this.modselecting = resultb
+                  },
+                ],
+                modselecting: [
+                  'submod',  fn10,
+                  'modhtml', fn01,
+                  function() {
+                    this.subselecting = resulta
+                    this.htmlselecting = resultb
+                  },
+                ],
+              }
+
+              var fromnow = fromobj[from]
+              _.each(this[from], function(v, k) {
+                resulta = resulta.concat(
+                  fromnow[1](newDataRelation[fromnow[0]], v)
+                )
+
+                resultb = resultb.concat(
+                  fromnow[3](newDataRelation[fromnow[2]], v)
+                )
+              })
+
+              this.$nextTick(fromnow[4])
+
+            }
+          },
+        })
+      </script>

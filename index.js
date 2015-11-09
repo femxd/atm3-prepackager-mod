@@ -36,7 +36,7 @@ var parseDir = function(ret) {
     })
     makeData()
     makeProject()
-
+    makeJson()
 }
 
 
@@ -132,6 +132,14 @@ var makeProject = function() {
             _.write(path.resolve(confHash.modProject, confHash.modsub[modName]), result.join('\n'))
         }
     })
+}
+
+var makeJson = function() {
+    var theJson = {
+        sub: confHash.modsub,
+        html: confHash.htmlData,
+    }
+    _.write(path.resolve(confHash.modProject, 'list.html'), _.read(path.resolve(__dirname, 'list.html')).split('__DATA__').join(JSON.stringify(theJson, null, 2)))
 }
 
 var trimstr = function(thestr) {
