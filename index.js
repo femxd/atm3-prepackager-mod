@@ -16,7 +16,7 @@ module.exports = function(ret, conf, settings, opt) {
         // console.log(imgpath, 'e:/testtc/img/' + imgpath.split('/img/')[1])
         _.copy(imgpath, path.resolve(confHash.modProject, 'img', imgpath.split('/img/')[1]), '', '*.psd', true, false)
     })
-    parseDir(ret)
+    parseDir()
 
 }
 var confHash = {
@@ -25,15 +25,23 @@ var confHash = {
 }
 
 
-var parseDir = function(ret) {
-    console.log(confHash.modProject, confHash.modhtml)
+var parseDir = function() {
+    // console.log(confHash.modProject, confHash.modhtml)
 
-    fis.util.map(ret.src, function(subpath, file){
-        if (_.glob(confHash.modhtml, subpath)) {
+    _.each(
+        _.find(confHash.modProject, confHash.modhtml, 'publish/**'),
+        function(subpath) {
             // fis.log.info("file: ", subpath)
-            parseHtml(subpath, ret.src[subpath]._content)
+            parseHtml(subpath, _.read(subpath))
         }
-    })
+    )
+
+    // _.map(ret.src, function(subpath, file){
+    //     if (_.glob(confHash.modhtml, subpath)) {
+    //         // fis.log.info("file: ", subpath)
+    //         parseHtml(subpath, ret.src[subpath]._content)
+    //     }
+    // })
     makeData()
     makeProject()
     makeJson()
@@ -113,7 +121,7 @@ var makeProject = function() {
         confHash.subData[modName].reverse()
     })
 
-    fis.log.info(confHash.subData)
+    // fis.log.info(confHash.subData)
 
     _.each(confHash.subData, function(modAry, modName) {
         var result = []
@@ -183,7 +191,7 @@ var multistr = function(thestr, thetime) {
 
 // var htmls = []
 
-// fis.util.map(ret.src, function(subpath, file){
+// _.map(ret.src, function(subpath, file){
 //     fis.log.info("file: ", subpath, file)
 // })
 // fis.log.info("file: ", ret.src['/html/video/detail-content.html'])
