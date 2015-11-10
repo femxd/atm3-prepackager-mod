@@ -144,7 +144,7 @@ var makeProject = function() {
 
 var makeJson = function() {
     var theJson = {
-        sub: confHash.modsub,
+        sub: confHash.subData,
         html: confHash.htmlData,
     }
     _.write(path.resolve(confHash.modProject, 'list.html'), _.read(path.resolve(__dirname, 'list.html')).split('__DATA__').join(JSON.stringify(theJson, null, 2)))
