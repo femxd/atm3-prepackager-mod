@@ -44,6 +44,9 @@ var data = __DATA__
             width: 100%;
             height: 80%;
           }
+          ._dboxf:nth-child(3) > select > option:after {
+            content: ' ( ' attr(data-count) ' )';
+          }
         </style>
     </head>
     <body>
@@ -60,7 +63,7 @@ var data = __DATA__
         </div>
         <div class="_dboxf">
           <select v-model="modselecting" v-on:click="click('modselecting')" multiple>
-            <option v-for="moditem in mod" v-text="moditem"></option>
+            <option v-for="moditem in mod" v-text="moditem" v-bind:data-count="modcount[moditem]"></option>
           </select>
         </div>
       </div>
@@ -69,123 +72,207 @@ var data = __DATA__
       <script src="https://cdn.bootcss.com/lodash.js/3.10.1/lodash.min.js"></script>
       <script src="http://7xj21u.com1.z0.glb.clouddn.com/cdn/debug.js"></script>
       <script>
-        // console.log(_)
-        // console.log(jQuery)
-        // console.log(debug)
-        debug.enable('*')
-        var log = debug('list.html')
-        // log(data)
+// console.log(_)
+// console.log(jQuery)
+// console.log(debug)
+debug.enable('*')
+var log = debug('list.html')
+log(data)
 
-        var newData = {}
-        var newDataRelation = {}
-        newDataRelation.subhtml = []
-        newDataRelation.modhtml = []
-        newDataRelation.submod = []
+var newDataRelation = {}
+newDataRelation.subhtml = []
+newDataRelation.modhtml = []
+newDataRelation.submod = []
 
-        newData.sub = []
-        newData.html = []
-        newData.mod = []
-        newData.subselecting = []
-        newData.htmlselecting = []
-        newData.modselecting = []
-        newData.from = null
+var newData = {}
 
-        _.each(data.sub, function(v, k) {
-          newData.sub.push(k)
+newData.sub = []
+newData.html = []
+newData.mod = []
+
+newData.subselecting = []
+newData.htmlselecting = []
+newData.modselecting = []
+
+newData.modcount = {}
+
+newData.from = null
+
+
+_.each(data, function(v, k) {
+  newData.html.push(v.html)
+
+  _.each(v.sub, function(vv, kk) {
+    newData.sub.push(vv)
+
+    newDataRelation.subhtml.push([vv, v.html])
+  })
+
+  _.each(v.mod, function(vv, kk) {
+    newData.mod.push(vv)
+
+    newDataRelation.modhtml.push([vv, v.html])
+
+    _.each(v.sub, function(vvv, kkk) {
+      newDataRelation.submod.push([vvv, vv])
+    })
+  })
+})
+
+newData.mod = _.uniq(newData.mod)
+newData.sub = _.uniq(newData.sub)
+
+newDataRelation.subhtml = _.uniq(newDataRelation.subhtml)
+newDataRelation.modhtml = _.uniq(newDataRelation.modhtml)
+newDataRelation.submod  = _.uniq(newDataRelation.submod)
+
+// log(newData)
+log(newDataRelation)
+
+var vm = new Vue({
+  el: '#panel',
+  data: newData,
+  methods: {
+    click: function(from) {
+      var resulta = []
+      var resultb = []
+
+      var fn01 = function(a, v) {
+        return _.filter(a, function(vv, kk) {
+          return vv[0] === v
+        }).map(function(vv, kk) {
+          return vv[1]
         })
-
-        _.each(data.html, function(v, k) {
-          newData.html.push(k)
-
-          _.each(v.modDep, function(vv, kk) {
-            newDataRelation.subhtml.push([vv, k])
-
-          })
-
-          _.each(v.modList, function(vv, kk) {
-            newData.mod.push(vv)
-
-            newDataRelation.modhtml.push([vv, k])
-
-            _.each(v.modDep, function(vvv, kkk) {
-              newDataRelation.submod.push([vvv, vv])
-            })
-          })
+      }
+      var fn10 = function(a, v) {
+        return _.filter(a, function(vv, kk) {
+          return vv[1] === v
+        }).map(function(vv, kk) {
+          return vv[0]
         })
+      }
 
-        newData.mod = _.uniq(newData.mod)
+      var fromobj = {
+        subselecting: [
+          'subhtml', fn01,
+          'submod',  fn01,
+          function() {
+            this.htmlselecting = resulta
+            this.modselecting = resultb
 
-        newDataRelation.subhtml = _.uniq(newDataRelation.subhtml)
-        newDataRelation.modhtml = _.uniq(newDataRelation.modhtml)
-        newDataRelation.submod = _.uniq(newDataRelation.submod)
+            var modcount = {}
 
-        // log(newData)
-        log(newDataRelation)
+            _(this.$data.subselecting)
+            .chain()
+            .each(function(v, k) {
 
-        var vm = new Vue({
-          el: '#panel',
-          data: newData,
-          methods: {
-            click: function(from) {
-              var resulta = []
-              var resultb = []
+              _(data)
+              .chain()
+              .each(function(vv, kk) {
+                if (_.contains(vv.sub, v)) {
 
-              var fn01 = function(a, v) {
-                return _.filter(a, function(vv, kk) {
-                  return vv[0] === v
-                }).map(function(vv, kk) {
-                  return vv[1]
-                })
-              }
-              var fn10 = function(a, v) {
-                return _.filter(a, function(vv, kk) {
-                  return vv[1] === v
-                }).map(function(vv, kk) {
-                  return vv[0]
-                })
-              }
+                  _.each(vv.mod, function(vvv, kkk) {
+                    modcount[vvv] = modcount[vvv] || 0
+                    modcount[vvv] = modcount[vvv] + 1
+                  })
 
-              var fromobj = {
-                subselecting: [
-                  'subhtml', fn01,
-                  'submod',  fn01,
-                  function() {
-                    this.htmlselecting = resulta
-                    this.modselecting = resultb
-                  },
-                ],
-                htmlselecting: [
-                  'subhtml', fn10,
-                  'modhtml', fn10,
-                  function() {
-                    this.subselecting = resulta
-                    this.modselecting = resultb
-                  },
-                ],
-                modselecting: [
-                  'submod',  fn10,
-                  'modhtml', fn01,
-                  function() {
-                    this.subselecting = resulta
-                    this.htmlselecting = resultb
-                  },
-                ],
-              }
-
-              var fromnow = fromobj[from]
-              _.each(this[from], function(v, k) {
-                resulta = resulta.concat(
-                  fromnow[1](newDataRelation[fromnow[0]], v)
-                )
-
-                resultb = resultb.concat(
-                  fromnow[3](newDataRelation[fromnow[2]], v)
-                )
+                }
               })
+              .run()
 
-              this.$nextTick(fromnow[4])
-
-            }
+            })
+            .run()
+            // log(modcount)
+            this.modcount = modcount
           },
-        })
+        ],
+        htmlselecting: [
+          'subhtml', fn10,
+          'modhtml', fn10,
+          function() {
+            this.subselecting = resulta
+            this.modselecting = resultb
+
+            var modcount = {}
+
+            _(this.$data.htmlselecting)
+            .chain()
+            .each(function(v, k) {
+
+              _(data)
+              .chain()
+              .where({ 'html': v })
+              .each(function(vv, kk) {
+
+                _.each(vv.mod, function(vvv, kkk) {
+                  modcount[vvv] = modcount[vvv] || 0
+                  modcount[vvv] = modcount[vvv] + 1
+                })
+
+              })
+              .run()
+
+            })
+            .run()
+
+            // log(modcount)
+            this.modcount = modcount
+          },
+        ],
+        modselecting: [
+          'submod',  fn10,
+          'modhtml', fn01,
+          function() {
+            this.subselecting = resulta
+            this.htmlselecting = resultb
+
+            var modcount = {}
+
+            _(this.$data.modselecting)
+            .chain()
+            .each(function(v, k) {
+
+              _(data)
+              .chain()
+              .each(function(vv, kk) {
+
+                  _(vv.mod)
+                  .chain()
+                  .each(function(vvv, kkk) {
+                    if (vvv === v) {
+
+                      modcount[vvv] = modcount[vvv] || 0
+                      modcount[vvv] = modcount[vvv] + 1
+
+                    }
+                  })
+                  .run()
+              })
+              .run()
+
+            })
+            .run()
+
+            // log(modcount)
+            this.modcount = modcount
+          },
+        ],
+      }
+
+      var fromnow = fromobj[from]
+      _.each(this[from], function(v, k) {
+        resulta = resulta.concat(
+          fromnow[1](newDataRelation[fromnow[0]], v)
+        )
+
+        resultb = resultb.concat(
+          fromnow[3](newDataRelation[fromnow[2]], v)
+        )
+      })
+
+      this.$nextTick(fromnow[4])
+
+    }
+  },
+})
       </script>

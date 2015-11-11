@@ -1,66 +1,63 @@
+var lodash = require('lodash')
+
 var path = require('./path.js')
+var db = require('./low.js')()
 var _ = fis.util
 
-
+var confHash = {}
 
 module.exports = function(ret, conf, settings, opt) {
 
-    confHash.modhtml = settings.modhtml
-    confHash.modpath = settings.modpath
-    confHash.modignore = settings.ignore || ''
-    confHash.modProject = path.resolve(fis.project.getProjectPath())
-    confHash.modsub = settings.modsub
+    confHash.html = settings.html
+    confHash.mod = settings.mod
+    confHash.sub = settings.sub
 
+    confHash.project = path.resolve(fis.project.getProjectPath())
 
-    _.each(_.find(confHash.modpath, 'img/**', 'publish/**'), function(imgpath) {
-        // console.log(imgpath, 'e:/testtc/img/' + imgpath.split('/img/')[1])
-        _.copy(imgpath, path.resolve(confHash.modProject, 'img', imgpath.split('/img/')[1]), '', '*.psd', true, false)
-    })
-    parseDir()
-
-}
-var confHash = {
-    subData: {},
-    htmlData: {},
-}
-
-
-var parseDir = function() {
-    // console.log(confHash.modProject, confHash.modhtml)
-
-    _.each(
-        _.find(confHash.modProject, confHash.modhtml, 'publish/**'),
-        function(subpath) {
-            // fis.log.info("file: ", subpath)
-            parseHtml(subpath, _.read(subpath))
+    // 复制图片 包括子目录 sub-xxx/img/**
+    lodash.each(
+        _.find(
+            confHash.mod, // base
+            'img/**', // include
+            'publish/**' // exclude
+        ),
+        function(imgpath) {
+            _.copy(imgpath, path.resolve(confHash.project, 'img', imgpath.split('/img/')[1]), '', '*.psd', true, false)
         }
     )
 
-    // _.map(ret.src, function(subpath, file){
-    //     if (_.glob(confHash.modhtml, subpath)) {
-    //         // fis.log.info("file: ", subpath)
-    //         parseHtml(subpath, ret.src[subpath]._content)
-    //     }
-    // })
-    makeData()
-    makeProject()
-    makeJson()
+    // 遍历 html
+    lodash.each(
+        _.find(
+            confHash.project, // base
+            confHash.html, // include
+            'publish/**' // exclude
+        ),
+        function(htmlpath) {
+            // fis.log.info("file: ", htmlpath)
+            var htmlcontent = _.read(htmlpath)
+            var modArray = []
+            parseMod(modArray, htmlcontent)
+
+            db('html').push({
+                html: htmlpath,
+                sub: parseProject(htmlcontent),
+                mod: modArray,
+            })
+
+        }
+    )
+
+    // 生成数据
+    var submod = makeSubMod()
+    makeCSS(submod)
+    makeList()
+
 }
 
 
-var parseHtml = function(htmlPath, htmlconent) {
-    confHash.htmlData[htmlPath] = {
-        modDep: [],
-        modHash: {},
-        modList: [],
-    }
-    parseProject(confHash.htmlData[htmlPath], htmlconent)
-    parseMod(confHash.htmlData[htmlPath], htmlconent)
-    confHash.htmlData[htmlPath].modHash = null
-    // console.log(confHash.htmlData[htmlPath])
-}
-
-var parseProject = function(htmlHash, modSource) {
+var parseProject = function(modSource) {
+    var result = []
     // console.log(modSource, 123)
     var modRe = /<!--[\S\s]*?-->|<meta\s+name\s*=\s*(["'])sub\1\s+content\s*=\s*(["'])(.+?)\2\s*\/*>/g
     modSource.replace(modRe, function(m0, m1, m2, m3, m4, m5, m6) {
@@ -68,26 +65,24 @@ var parseProject = function(htmlHash, modSource) {
         // console.log(m3.split(/[,\s\xA0]+/g))
         if (m3) {
             // console.log(m3)
-            htmlHash.modDep = m3.split(/[,\s\xA0]+/g)
+            result = lodash.uniq(m3.split(/[,\s\xA0]+/g))
         }
 
     })
+    return result
 }
 
-
-var parseMod = function(htmlHash, modSource) {
+var parseMod = function(modArray, modSource) {
     var modRe = /<!--[\S\s]*?-->|<component\s+is\s*=\s*(["'])(.+?)\1(\s*load\s*=\s*(["'])(.+?)\4)*/g
     modSource.replace(modRe, function(m0, m1, m2, m3, m4, m5, m6) {
-        var modName = trimstr(m2 || '')
+        var modName = lodash.trim(m2 || '')
         if (modName === '') return false
-        if (htmlHash.modHash[modName] === true) return false
-        htmlHash.modHash[modName] = true
-        htmlHash.modList.push(modName)
+        modArray.push(modName)
 
-        var deppath = path.resolve(confHash.modpath, modName, 'index.html')
+        var deppath = path.resolve(confHash.mod, modName, 'index.html')
 
         if (_.exists(deppath)) {
-            parseMod(htmlHash, _.read(deppath))
+            parseMod(modArray, _.read(deppath))
         } else {
             fis.log.info('mod not found', deppath)
         }
@@ -95,38 +90,50 @@ var parseMod = function(htmlHash, modSource) {
 
 }
 
-var makeData = function() {
-    // console.log(confHash.htmlData)
-    _.each(confHash.htmlData, function(htmlHash, htmlPath) {
-        // if ()
-        // console.log(htmlPath, htmlHash.modDep)
-        // console.log(htmlPath, htmlHash.modList.join('\n'))
-        _.each(htmlHash.modDep, function(v, k) {
-            confHash.subData[v] = confHash.subData[v] || []
-            confHash.subData[v] = _.union(confHash.subData[v], htmlHash.modList)
-        })
-    })
+var makeSubMod = function() {
 
-    // fis.log.info(confHash.subData)
+    var subMod = {}
+
+    db('html')
+        .chain()
+        .each(function(v,k) {
+            // fis.log.info(v)
+            lodash.each(v.sub, function(vv, kk) {
+                subMod[vv] = subMod[vv] || []
+                subMod[vv] = subMod[vv].concat(v.mod)
+            })
+        })
+        .value();
+
+    lodash.each(subMod, function(v, k) {
+
+        if ( lodash.contains(subMod[k], 'css-base') ) {
+            lodash.pull(subMod[k], 'css-base')
+            subMod[k].push('css-base')
+        }
+        if ( lodash.contains(subMod[k], 'css-reset') ) {
+            lodash.pull(subMod[k], 'css-reset')
+            subMod[k].push('css-reset')
+        }
+
+        subMod[k].reverse()
+        subMod[k] = lodash.uniq(subMod[k])
+    })
+    // fis.log.info(subMod)
+    return subMod
 }
 
-var makeProject = function() {
-    _.each(confHash.subData, function(modAry, modName) {
-        if ( _.contains(confHash.subData[modName], 'css-base') ) {
-            confHash.subData[modName].push('css-base')
-        }
-        if ( _.contains(confHash.subData[modName], 'css-reset') ) {
-            confHash.subData[modName].push('css-reset')
-        }
-        confHash.subData[modName].reverse()
-    })
-
-    // fis.log.info(confHash.subData)
-
-    _.each(confHash.subData, function(modAry, modName) {
+var makeCSS = function(submod) {
+    lodash.each(submod, function(v, k) {
         var result = []
-        _.each(modAry, function(v, k) {
-            var deppath = path.resolve(confHash.modpath, v, 'index.css')
+
+        lodash.each(v, function(v, k) {
+            // console.log(v, k)
+            var deppath = path.resolve(
+                confHash.mod,
+                v,
+                'index.css'
+            )
 
             if (_.exists(deppath)) {
                 result.push(_.read(deppath))
@@ -135,31 +142,85 @@ var makeProject = function() {
             }
         })
 
-        // fis.log.info(confHash.modProject)
-        if (confHash.modsub[modName]) {
-            _.write(path.resolve(confHash.modProject, confHash.modsub[modName]), result.join('\n'))
+        if (confHash.sub[k]) {
+            _.write(
+                path.resolve(
+                    confHash.project,
+                    confHash.sub[k]
+                ),
+                result.join('\n')
+            )
         }
     })
 }
 
-var makeJson = function() {
-    var theJson = {
-        sub: confHash.subData,
-        html: confHash.htmlData,
-    }
-    _.write(path.resolve(confHash.modProject, 'list.html'), _.read(path.resolve(__dirname, 'list.html')).split('__DATA__').join(JSON.stringify(theJson, null, 2)))
+var makeList = function() {
+    _.write(
+        path.resolve(confHash.project, 'list.html'),
+        _.read( path.resolve(__dirname, 'list.html') )
+            .split('__DATA__')
+            .join(
+                JSON.stringify(
+                    db('html').chain().value()
+                )
+            )
+    )
 }
 
-var trimstr = function(thestr) {
-    return thestr.replace(/^[\s\uFEFF\xa0\u3000]+|[\uFEFF\xa0\u3000\s]+$/g, "")
-}
+// var confHash = {
+//     subData: {},
+//     htmlData: {},
+// }
 
-var multistr = function(thestr, thetime) {
-    thetime = (thetime >> 0)
-    var t = (thetime > 1 ? multistr(thestr, thetime / 2) : '')
-    return t + (thetime % 2? t + thestr: t)
-}
+// var trimstr = function(thestr) {
+//     return thestr.replace(/^[\s\uFEFF\xa0\u3000]+|[\uFEFF\xa0\u3000\s]+$/g, "")
+// }
 
+// var multistr = function(thestr, thetime) {
+//     thetime = (thetime >> 0)
+//     var t = (thetime > 1 ? multistr(thestr, thetime / 2) : '')
+//     return t + (thetime % 2? t + thestr: t)
+// }
+
+        // if ()
+
+        // console.log(htmlPath, htmlHash.modDep)
+
+        // console.log(htmlPath, htmlHash.modList.join('\n'))
+
+
+        // if (htmlHash.modHash[modName] === true) return false
+
+        // htmlHash.modHash[modName] = true
+
+
+            // htmlHash.modDep = m3.split(/[,\s\xA0]+/g)
+
+
+            // parseProject(confHash.htmlData[htmlpath], htmlcontent)
+
+            // parseMod(confHash.htmlData[htmlpath], htmlcontent)
+
+
+// var parseHtml = function(htmlPath, htmlcontent) {
+
+//     confHash.htmlData[htmlPath].modHash = null
+//     console.log(confHash.htmlData[htmlPath])
+// }
+
+// var parseDir = function() {
+//     console.log(confHash.project, confHash.html)
+
+
+
+//     _.map(ret.src, function(subpath, file){
+//         if (_.glob(confHash.html, subpath)) {
+//             // fis.log.info("file: ", subpath)
+//             parseHtml(subpath, ret.src[subpath]._content)
+//         }
+//     })
+
+// }
 
         // m3.replace(/[^,\s\xA0]+/g, function(v) {
         //     // console.log(v)
@@ -172,12 +233,12 @@ var multistr = function(thestr, thetime) {
     // console.log(confHash)
     // console.log(_)
     // 复制图片
-    // _.copy(path.resolve(confHash.modpath, 'img'), 'e:/testtc/img', '*.png', 'publish/**', true, false)
-    // _.copy(path.resolve(confHash.modpath, 'sub-*/img'), 'e:/testtc/img', '*.png', 'publish/**', true, false)
+    // _.copy(path.resolve(confHash.mod, 'img'), 'e:/testtc/img', '*.png', 'publish/**', true, false)
+    // _.copy(path.resolve(confHash.mod, 'sub-*/img'), 'e:/testtc/img', '*.png', 'publish/**', true, false)
 
-// _.glob(path.resolve(confHash.modProject, confHash.modhtml), {
+// _.glob(path.resolve(confHash.project, confHash.html), {
 //     nodir: true,
-//     ignore: path.resolve(confHash.modProject, confHash.modignore),
+//     ignore: path.resolve(confHash.project, confHash.modignore),
 // }, function(err, list) {
 //     console.log(list)
 //     lodash.each(list, function(v, k) {
@@ -199,7 +260,7 @@ var multistr = function(thestr, thetime) {
 // fis.log.info('settings', settings)
 // fis.log.info('opt', opt)
 
-// _.each(confHash.subData, function(v, k) {
+// lodash.each(confHash.subData, function(v, k) {
 //     confHash.subData[k] = _.union.apply(null, v)
 // })
 
@@ -214,4 +275,4 @@ var multistr = function(thestr, thetime) {
 // })
 
 // console.log(db.object)
-// console.log(path.resolve(confHash.modProject, confHash.html))
+// console.log(path.resolve(confHash.project, confHash.html))

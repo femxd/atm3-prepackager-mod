@@ -1,6 +1,6 @@
 {
   "name": "atm3-prepackager-mod",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "atm3 mod plugin",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/femxd/atm3-prepackager-mod.git"
+  },
+  "dependencies": {
+    "lodash": "^3.6.0"
   },
   "keywords": [
     "atm3",
