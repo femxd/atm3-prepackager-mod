@@ -50,7 +50,7 @@ module.exports = function(ret, conf, settings, opt) {
 
     // 生成数据
     var submod = makeSubMod()
-    makeCSS(submod)
+    makeSCSS(submod)
     makeList()
 
 }
@@ -123,7 +123,8 @@ var makeSubMod = function() {
     return subMod
 }
 
-var makeCSS = function(submod) {
+var makeSCSS = function(submod) {
+    // fis.log.info(submod)
     lodash.each(submod, function(v, k) {
         var result = []
 
@@ -132,11 +133,13 @@ var makeCSS = function(submod) {
             var deppath = path.resolve(
                 confHash.mod,
                 v,
-                'index.css'
+                'index.scss'
             )
 
             if (_.exists(deppath)) {
-                result.push(_.read(deppath))
+                result.push(
+                    '@import "'+ deppath +'";'
+                )
             } else {
                 fis.log.info('mod not found', deppath)
             }
