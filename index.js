@@ -40,7 +40,7 @@ module.exports = function(ret, conf, settings, opt) {
             parseMod(modArray, htmlcontent)
 
             db('html').push({
-                html: htmlpath,
+                html: htmlpath.split(confHash.project)[1],
                 sub: parseProject(htmlcontent),
                 mod: modArray,
             })

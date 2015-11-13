@@ -151,6 +151,31 @@ var vm = new Vue({
           return vv[0]
         })
       }
+      var fncount = function(selected, fnfilter) {
+        var modcount = {}
+        _(selected)
+        .chain()
+        .each(function(v, k) {
+
+          _(data)
+          .chain()
+          .filter(fnfilter(v))
+          .each(function(vv, kk) {
+
+              _.each(vv.mod, function(vvv, kkk) {
+                modcount[vvv] = modcount[vvv] || 0
+                modcount[vvv] = modcount[vvv] + 1
+              })
+
+          })
+          .run()
+
+        })
+        .run()
+
+        // log(modcount)
+        return modcount
+      }
 
       var fromobj = {
         subselecting: [
@@ -159,31 +184,14 @@ var vm = new Vue({
           function() {
             this.htmlselecting = resulta
             this.modselecting = resultb
-
-            var modcount = {}
-
-            _(this.$data.subselecting)
-            .chain()
-            .each(function(v, k) {
-
-              _(data)
-              .chain()
-              .each(function(vv, kk) {
-                if (_.contains(vv.sub, v)) {
-
-                  _.each(vv.mod, function(vvv, kkk) {
-                    modcount[vvv] = modcount[vvv] || 0
-                    modcount[vvv] = modcount[vvv] + 1
-                  })
-
+            this.modcount = fncount(
+                this.$data.subselecting,
+                function(v) {
+                    return function(vv, kk) {
+                        return _.contains(vv.sub, v)
+                    }
                 }
-              })
-              .run()
-
-            })
-            .run()
-            // log(modcount)
-            this.modcount = modcount
+            )
           },
         ],
         htmlselecting: [
@@ -192,31 +200,14 @@ var vm = new Vue({
           function() {
             this.subselecting = resulta
             this.modselecting = resultb
-
-            var modcount = {}
-
-            _(this.$data.htmlselecting)
-            .chain()
-            .each(function(v, k) {
-
-              _(data)
-              .chain()
-              .where({ 'html': v })
-              .each(function(vv, kk) {
-
-                _.each(vv.mod, function(vvv, kkk) {
-                  modcount[vvv] = modcount[vvv] || 0
-                  modcount[vvv] = modcount[vvv] + 1
-                })
-
-              })
-              .run()
-
-            })
-            .run()
-
-            // log(modcount)
-            this.modcount = modcount
+            this.modcount = fncount(
+                this.$data.htmlselecting,
+                function(v) {
+                    return function(vv, kk) {
+                        return vv.html === v
+                    }
+                }
+            )
           },
         ],
         modselecting: [
@@ -225,36 +216,14 @@ var vm = new Vue({
           function() {
             this.subselecting = resulta
             this.htmlselecting = resultb
-
-            var modcount = {}
-
-            _(this.$data.modselecting)
-            .chain()
-            .each(function(v, k) {
-
-              _(data)
-              .chain()
-              .each(function(vv, kk) {
-
-                  _(vv.mod)
-                  .chain()
-                  .each(function(vvv, kkk) {
-                    if (vvv === v) {
-
-                      modcount[vvv] = modcount[vvv] || 0
-                      modcount[vvv] = modcount[vvv] + 1
-
+            this.modcount = fncount(
+                this.$data.modselecting,
+                function(v) {
+                    return function(vv, kk) {
+                        return _.contains(vv.mod, v)
                     }
-                  })
-                  .run()
-              })
-              .run()
-
-            })
-            .run()
-
-            // log(modcount)
-            this.modcount = modcount
+                }
+            )
           },
         ],
       }
