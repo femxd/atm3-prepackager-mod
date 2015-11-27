@@ -1,13 +1,16 @@
 var lodash = require('lodash')
 
 var path = require('./path.js')
-var db = require('./low.js')()
+// var db = require('./low.js')()
+var leancloud = require('./leancloud.js')
+var dbhtml = lodash([])
 var _ = fis.util
 
 var confHash = {}
 
 module.exports = function(ret, conf, settings, opt) {
 
+    confHash.name = settings.name
     confHash.html = settings.html
     confHash.mod = settings.mod
     confHash.sub = settings.sub
@@ -15,38 +18,44 @@ module.exports = function(ret, conf, settings, opt) {
     confHash.project = path.resolve(fis.project.getProjectPath())
 
     // 复制图片 包括子目录 sub-xxx/img/**
-    lodash.each(
-        _.find(
-            confHash.mod, // base
-            'img/**', // include
-            'publish/**' // exclude
-        ),
-        function(imgpath) {
-            _.copy(imgpath, path.resolve(confHash.project, 'img', imgpath.split('/img/')[1]), '', '*.psd', true, false)
-        }
-    )
+    // lodash.each(
+    //     _.find(
+    //         confHash.mod, // base
+    //         'img/**', // include
+    //         'publish/**' // exclude
+    //     ),
+    //     function(imgpath) {
+    //         _.copy(imgpath, path.resolve(confHash.project, 'img', imgpath.split('/img/')[1]), '', '*.psd', true, false)
+    //     }
+    // )
 
     // 遍历 html
-    lodash.each(
-        _.find(
-            confHash.project, // base
-            confHash.html, // include
-            'publish/**' // exclude
-        ),
-        function(htmlpath) {
-            // fis.log.info("file: ", htmlpath)
-            var htmlcontent = _.read(htmlpath)
+    // lodash(ret.src)
+    lodash(_.find(
+        confHash.project, // base
+        confHash.html, // include
+        'publish/**' // exclude
+    ))
+        .chain()
+        // .keys()
+        // .filter(function(v, k) {
+        //     return _.glob('/' + confHash.html, v)
+        // })
+        .each(function(v, k) {
+            // fis.log.info("file: ", v)
+            var htmlcontent = _.read(v)
+            // var htmlcontent = _.read(confHash.project + v)
             var modArray = []
             parseMod(modArray, htmlcontent)
 
-            db('html').push({
-                html: htmlpath.split(confHash.project)[1],
+            dbhtml = dbhtml.push({
+                // html: v,
+                html: v.split(confHash.project)[1],
                 sub: parseProject(htmlcontent),
                 mod: modArray,
             })
-
-        }
-    )
+        })
+        .run()
 
     // 生成数据
     var submod = makeSubMod()
@@ -94,7 +103,7 @@ var makeSubMod = function() {
 
     var subMod = {}
 
-    db('html')
+    dbhtml
         .chain()
         .each(function(v,k) {
             // fis.log.info(v)
@@ -103,7 +112,7 @@ var makeSubMod = function() {
                 subMod[vv] = subMod[vv].concat(v.mod)
             })
         })
-        .value();
+        .run();
 
     lodash.each(subMod, function(v, k) {
 
@@ -158,16 +167,13 @@ var makeSCSS = function(submod) {
 }
 
 var makeList = function() {
-    _.write(
-        path.resolve(confHash.project, 'list.html'),
-        _.read( path.resolve(__dirname, 'list.html') )
-            .split('__DATA__')
-            .join(
-                JSON.stringify(
-                    db('html').chain().value()
-                )
-            )
-    )
+    leancloud.put(confHash.name, {
+        data: JSON.stringify( dbhtml.value() ),
+        count: {
+            "__op":"Increment",
+            "amount":1
+        },
+    })
 }
 
 // var confHash = {
