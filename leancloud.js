@@ -1,4 +1,4 @@
-var thehttp = require('https')
+var thehttp = require('http')
 var fs = require('fs')
 
 var put = function(id, data) {
@@ -6,16 +6,16 @@ var put = function(id, data) {
   // console.log(postData)
 
   var options = {
-    hostname: 'api.leancloud.cn',
-    port: 443,
-    path: '/1.1/classes/Atmmod/' + id,
+    hostname: 'feng.avosapps.com',
+    port: 80,
+    path: '/Atmmod/' + id,
     method: 'PUT',
-    headers: {
-      'X-LC-Id': '9niyzjv2qwxx8b77e67bffy0h936f3hgc2gtnjdw44dh501w',
-      'X-LC-Key': 'ff18me0vtyraa8yqtj08a3jmcdtdni655fvqys5sh755sz3z',
-      'Content-Type': 'application/json',
-      'Content-Length': postData.length
-    }
+    // headers: {
+    //   'X-LC-Id': '9niyzjv2qwxx8b77e67bffy0h936f3hgc2gtnjdw44dh501w',
+    //   'X-LC-Key': 'ff18me0vtyraa8yqtj08a3jmcdtdni655fvqys5sh755sz3z',
+    //   'Content-Type': 'application/json',
+    //   'Content-Length': postData.length
+    // },
   }
 
   var req = thehttp.request(options, function(res) {
@@ -38,24 +38,25 @@ var put = function(id, data) {
   req.end()
 }
 
-var post = function(cb) {
-  var postData = '{}'
+var get = function(cb) {
+  // var postData = '{}'
 
   var options = {
-    hostname: 'api.leancloud.cn',
-    port: 443,
-    path: '/1.1/functions/Atmmod',
-    method: 'POST',
-    headers: {
-      'X-LC-Id': '9niyzjv2qwxx8b77e67bffy0h936f3hgc2gtnjdw44dh501w',
-      'X-LC-Key': 'ff18me0vtyraa8yqtj08a3jmcdtdni655fvqys5sh755sz3z',
-      'Content-Type': 'application/json',
-      'Content-Length': postData.length,
-    }
+    hostname: 'feng.avosapps.com',
+    port: 80,
+    path: '/Atmmod',
+    method: 'GET',
+    // headers: {
+    //   'X-LC-Id': '9niyzjv2qwxx8b77e67bffy0h936f3hgc2gtnjdw44dh501w',
+    //   'X-LC-Key': 'ff18me0vtyraa8yqtj08a3jmcdtdni655fvqys5sh755sz3z',
+    //   'Content-Type': 'application/json',
+    //   'Content-Length': postData.length,
+    // },
   }
 
   var req = thehttp.request(options, function(res) {
     console.log('STATUS: ' + res.statusCode)
+    // console.log(res)
     // console.log('HEADERS: ' + JSON.stringify(res.headers))
     var result = []
     res.setEncoding('utf8')
@@ -74,11 +75,11 @@ var post = function(cb) {
     console.log('problem with request: ' + e.message)
   })
 
-  req.write(postData)
+  // req.write(postData)
   req.end()
 }
 
-exports.post = post
+exports.get = get
 exports.put = put
 
 // post({

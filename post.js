@@ -2,7 +2,7 @@ var leancloud = require('./leancloud.js')
 var lodash = require('lodash')
 var fs = require('fs')
 
-leancloud.post(function(data) {
+leancloud.get(function(data) {
 
     // fs.writeFileSync('./data.json', data, {
     //     encoding: 'utf8'
@@ -11,6 +11,7 @@ leancloud.post(function(data) {
     // var result = JSON.parse(data)
     // console.log(result.result[0])
     // console.log(JSON.parse(result))
+    // console.log(data)
     // console.log(data[1])
     // console.log(data[2])
     // console.log(data[3])
@@ -20,7 +21,7 @@ leancloud.post(function(data) {
     var list = []
     var hash = {}
 
-    lodash(JSON.parse(data).result)
+    lodash(JSON.parse(data))
         .chain()
         .each(function (v, k) {
             // console.log(v, k)
