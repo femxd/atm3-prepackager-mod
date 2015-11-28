@@ -11,6 +11,8 @@ var confHash = {}
 module.exports = function(ret, conf, settings, opt) {
 
     confHash.name = settings.name
+    confHash.dist = settings.dist
+
     confHash.html = settings.html
     confHash.mod = settings.mod
     confHash.sub = settings.sub
@@ -61,7 +63,7 @@ module.exports = function(ret, conf, settings, opt) {
     var submod = makeSubMod()
     makeSCSS(submod)
     makeList()
-
+    getDist()
 }
 
 
@@ -174,6 +176,43 @@ var makeList = function() {
             "amount":1
         },
     })
+}
+
+var getDist = function() {
+
+    leancloud.get(function(data) {
+
+        var list = []
+        var hash = {}
+
+        lodash(JSON.parse(data))
+            .chain()
+            .each(function (v, k) {
+                // console.log(v, k)
+                lodash(v)
+                    .chain()
+                    .each(function(vv, kk) {
+                        // console.log(vv)
+                        if (hash[vv.html]) {
+                            list[hash[vv.html]] = vv
+                        }
+                        else {
+                            list.push(vv)
+                            hash[vv.html] = kk
+                        }
+                    })
+                    .run()
+            })
+            .run()
+
+        // console.log(list)
+        _.write(confHash.dist,
+            _.read('./list.html' )
+                .split('__DATA__')
+                .join(JSON.stringify( list ))
+        )
+    })
+
 }
 
 // var confHash = {

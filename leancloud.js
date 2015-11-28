@@ -2,20 +2,13 @@ var thehttp = require('http')
 var fs = require('fs')
 
 var put = function(id, data) {
-  var postData = JSON.stringify(data)
-  // console.log(postData)
+  var sendData = JSON.stringify(data)
 
   var options = {
     hostname: 'feng.avosapps.com',
     port: 80,
     path: '/Atmmod/' + id,
     method: 'PUT',
-    // headers: {
-    //   'X-LC-Id': '9niyzjv2qwxx8b77e67bffy0h936f3hgc2gtnjdw44dh501w',
-    //   'X-LC-Key': 'ff18me0vtyraa8yqtj08a3jmcdtdni655fvqys5sh755sz3z',
-    //   'Content-Type': 'application/json',
-    //   'Content-Length': postData.length
-    // },
   }
 
   var req = thehttp.request(options, function(res) {
@@ -34,24 +27,17 @@ var put = function(id, data) {
     console.log('problem with request: ' + e.message)
   })
 
-  req.write(postData)
+  req.write(sendData)
   req.end()
 }
 
 var get = function(cb) {
-  // var postData = '{}'
 
   var options = {
     hostname: 'feng.avosapps.com',
     port: 80,
     path: '/Atmmod',
     method: 'GET',
-    // headers: {
-    //   'X-LC-Id': '9niyzjv2qwxx8b77e67bffy0h936f3hgc2gtnjdw44dh501w',
-    //   'X-LC-Key': 'ff18me0vtyraa8yqtj08a3jmcdtdni655fvqys5sh755sz3z',
-    //   'Content-Type': 'application/json',
-    //   'Content-Length': postData.length,
-    // },
   }
 
   var req = thehttp.request(options, function(res) {
@@ -75,15 +61,8 @@ var get = function(cb) {
     console.log('problem with request: ' + e.message)
   })
 
-  // req.write(postData)
   req.end()
 }
 
 exports.get = get
 exports.put = put
-
-// post({
-//  'html':'html',
-//  'sub':'sub',
-//  'mod':'mod'
-// })
