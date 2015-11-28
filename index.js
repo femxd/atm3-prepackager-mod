@@ -211,6 +211,8 @@ var getDist = function() {
                 .split('__DATA__')
                 .join(JSON.stringify( list ))
         )
+
+        process.exit()
     })
 
 }
