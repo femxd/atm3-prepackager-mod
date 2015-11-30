@@ -1,18 +1,23 @@
 var thehttp = require('http')
 var fs = require('fs')
 
-var put = function(id, data) {
+var put = function(id, data, cb) {
   var sendData = JSON.stringify(data)
 
   var options = {
+    // hostname: '127.0.0.1',
+    // port: 3000,
     hostname: 'feng.avosapps.com',
     port: 80,
     path: '/Atmmod/' + id,
     method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    }
   }
 
   var req = thehttp.request(options, function(res) {
-    console.log('STATUS: ' + res.statusCode)
+    console.log('STATUS put: ' + res.statusCode)
     // console.log('HEADERS: ' + JSON.stringify(res.headers))
     res.setEncoding('utf8')
     res.on('data', function (chunk) {
@@ -20,6 +25,7 @@ var put = function(id, data) {
     })
     res.on('end', function() {
       // console.log('No more data in response.')
+      cb()
     })
   })
 
@@ -34,6 +40,8 @@ var put = function(id, data) {
 var get = function(cb) {
 
   var options = {
+    // hostname: '127.0.0.1',
+    // port: 3000,
     hostname: 'feng.avosapps.com',
     port: 80,
     path: '/Atmmod',
@@ -41,7 +49,7 @@ var get = function(cb) {
   }
 
   var req = thehttp.request(options, function(res) {
-    console.log('STATUS: ' + res.statusCode)
+    console.log('STATUS get: ' + res.statusCode)
     // console.log(res)
     // console.log('HEADERS: ' + JSON.stringify(res.headers))
     var result = []

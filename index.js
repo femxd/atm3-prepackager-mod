@@ -169,12 +169,9 @@ var makeSCSS = function(submod) {
 }
 
 var makeList = function() {
-    leancloud.put(confHash.name, {
-        data: JSON.stringify( dbhtml.value() ),
-        count: {
-            "__op":"Increment",
-            "amount":1
-        },
+    leancloud.put(confHash.name, dbhtml.value(), function() {
+        confHash.makeListDone = true
+        myexit()
     })
 }
 
@@ -207,14 +204,22 @@ var getDist = function() {
 
         // console.log(list)
         _.write(confHash.dist,
-            _.read('./list.html' )
+            _.read( path.resolve(__dirname, 'list.html') )
                 .split('__DATA__')
                 .join(JSON.stringify( list ))
         )
 
-        process.exit()
+        confHash.getDistDone = true
+        myexit()
     })
 
+}
+
+var myexit = function() {
+    if (confHash.makeListDone === true
+    && confHash.getDistDone === true) {
+        process.exit()
+    }
 }
 
 // var confHash = {
