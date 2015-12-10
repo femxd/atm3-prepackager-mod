@@ -1,4 +1,4 @@
-var lodash = require('lodash')
+var lodash = require('./lodash.min.js')
 
 var path = require('./path.js')
 // var db = require('./low.js')()
@@ -18,18 +18,6 @@ module.exports = function(ret, conf, settings, opt) {
     confHash.sub = settings.sub
 
     confHash.project = path.resolve(fis.project.getProjectPath())
-
-    // 复制图片 包括子目录 sub-xxx/img/**
-    // lodash.each(
-    //     _.find(
-    //         confHash.mod, // base
-    //         'img/**', // include
-    //         'publish/**' // exclude
-    //     ),
-    //     function(imgpath) {
-    //         _.copy(imgpath, path.resolve(confHash.project, 'img', imgpath.split('/img/')[1]), '', '*.psd', true, false)
-    //     }
-    // )
 
     // 遍历 html
     // lodash(ret.src)
@@ -63,7 +51,6 @@ module.exports = function(ret, conf, settings, opt) {
     var submod = makeSubMod()
     makeSCSS(submod)
     makeList()
-    getDist()
 }
 
 
@@ -117,12 +104,12 @@ var makeSubMod = function() {
         .run();
 
     lodash.each(subMod, function(v, k) {
-
-        if ( lodash.contains(subMod[k], 'css-base') ) {
+        if ( lodash.includes(subMod[k], 'css-base') ) {
             lodash.pull(subMod[k], 'css-base')
             subMod[k].push('css-base')
         }
-        if ( lodash.contains(subMod[k], 'css-reset') ) {
+
+        if ( lodash.includes(subMod[k], 'css-reset') ) {
             lodash.pull(subMod[k], 'css-reset')
             subMod[k].push('css-reset')
         }
@@ -168,166 +155,32 @@ var makeSCSS = function(submod) {
     })
 }
 
-var makeList = function() {
-    leancloud.put(confHash.name, dbhtml.value(), function() {
-        confHash.makeListDone = true
-        myexit()
-    })
+var ary2obj = function(a) {
+  var result = {}
+  lodash.each(a, function(v, k) {
+    result[v.html] = {
+        sub: v.sub,
+        mod: v.mod,
+    }
+  })
+  return result
 }
 
-var getDist = function() {
-
-    leancloud.get(function(data) {
-
-        var list = []
-        var hash = {}
-
-        lodash(JSON.parse(data))
-            .chain()
-            .each(function (v, k) {
-                // console.log(v, k)
-                lodash(v)
-                    .chain()
-                    .each(function(vv, kk) {
-                        // console.log(vv)
-                        if (hash[vv.html]) {
-                            list[hash[vv.html]] = vv
-                        }
-                        else {
-                            list.push(vv)
-                            hash[vv.html] = kk
-                        }
-                    })
-                    .run()
-            })
-            .run()
-
+var makeList = function() {
+    // console.log(typeof dbhtml.value())
+    leancloud.put(confHash.name, ary2obj(dbhtml.value()), function(data) {
+        if (data === 'put get noproject') {
+            return false
+        }
         // console.log(list)
         _.write(confHash.dist,
             _.read( path.resolve(__dirname, 'list.html') )
                 .split('__DATA__')
-                .join(JSON.stringify( list ))
+                .join(data)
         )
 
-        confHash.getDistDone = true
-        myexit()
-    })
-
-}
-
-var myexit = function() {
-    if (confHash.makeListDone === true
-    && confHash.getDistDone === true) {
         process.exit()
-    }
+    })
 }
 
-// var confHash = {
-//     subData: {},
-//     htmlData: {},
-// }
 
-// var trimstr = function(thestr) {
-//     return thestr.replace(/^[\s\uFEFF\xa0\u3000]+|[\uFEFF\xa0\u3000\s]+$/g, "")
-// }
-
-// var multistr = function(thestr, thetime) {
-//     thetime = (thetime >> 0)
-//     var t = (thetime > 1 ? multistr(thestr, thetime / 2) : '')
-//     return t + (thetime % 2? t + thestr: t)
-// }
-
-        // if ()
-
-        // console.log(htmlPath, htmlHash.modDep)
-
-        // console.log(htmlPath, htmlHash.modList.join('\n'))
-
-
-        // if (htmlHash.modHash[modName] === true) return false
-
-        // htmlHash.modHash[modName] = true
-
-
-            // htmlHash.modDep = m3.split(/[,\s\xA0]+/g)
-
-
-            // parseProject(confHash.htmlData[htmlpath], htmlcontent)
-
-            // parseMod(confHash.htmlData[htmlpath], htmlcontent)
-
-
-// var parseHtml = function(htmlPath, htmlcontent) {
-
-//     confHash.htmlData[htmlPath].modHash = null
-//     console.log(confHash.htmlData[htmlPath])
-// }
-
-// var parseDir = function() {
-//     console.log(confHash.project, confHash.html)
-
-
-
-//     _.map(ret.src, function(subpath, file){
-//         if (_.glob(confHash.html, subpath)) {
-//             // fis.log.info("file: ", subpath)
-//             parseHtml(subpath, ret.src[subpath]._content)
-//         }
-//     })
-
-// }
-
-        // m3.replace(/[^,\s\xA0]+/g, function(v) {
-        //     // console.log(v)
-        //     htmlHash.project = v
-        // })
-
-        // fis.log.info(result.join('\n'))
-
-
-    // console.log(confHash)
-    // console.log(_)
-    // 复制图片
-    // _.copy(path.resolve(confHash.mod, 'img'), 'e:/testtc/img', '*.png', 'publish/**', true, false)
-    // _.copy(path.resolve(confHash.mod, 'sub-*/img'), 'e:/testtc/img', '*.png', 'publish/**', true, false)
-
-// _.glob(path.resolve(confHash.project, confHash.html), {
-//     nodir: true,
-//     ignore: path.resolve(confHash.project, confHash.modignore),
-// }, function(err, list) {
-//     console.log(list)
-//     lodash.each(list, function(v, k) {
-//         // console.log(v, k)
-//         // console.log(fs.read(v), k)
-//         parseHtml(v, _.read(v))
-//     })
-
-
-// })
-
-// var htmls = []
-
-// _.map(ret.src, function(subpath, file){
-//     fis.log.info("file: ", subpath, file)
-// })
-// fis.log.info("file: ", ret.src['/html/video/detail-content.html'])
-// fis.log.info('confHash', confHash)
-// fis.log.info('settings', settings)
-// fis.log.info('opt', opt)
-
-// lodash.each(confHash.subData, function(v, k) {
-//     confHash.subData[k] = _.union.apply(null, v)
-// })
-
-// var db = (new require('lowdb'))()
-
-// db('mod').pu
-// sh({
-//     a: 'a',
-// })
-// db('mod').push({
-//     b: 'b',
-// })
-
-// console.log(db.object)
-// console.log(path.resolve(confHash.project, confHash.html))

@@ -102,18 +102,18 @@ newData.from = null
 
 
 _.each(data, function(v, k) {
-  newData.html.push(v.html)
+  newData.html.push(k)
 
   _.each(v.sub, function(vv, kk) {
     newData.sub.push(vv)
 
-    newDataRelation.subhtml.push([vv, v.html])
+    newDataRelation.subhtml.push([vv, k])
   })
 
   _.each(v.mod, function(vv, kk) {
     newData.mod.push(vv)
 
-    newDataRelation.modhtml.push([vv, v.html])
+    newDataRelation.modhtml.push([vv, k])
 
     _.each(v.sub, function(vvv, kkk) {
       newDataRelation.submod.push([vvv, vv])
@@ -206,7 +206,7 @@ var vm = new Vue({
                 this.$data.htmlselecting,
                 function(v) {
                     return function(vv, kk) {
-                        return vv.html === v
+                        return kk === v
                     }
                 }
             )
