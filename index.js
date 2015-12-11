@@ -177,6 +177,8 @@ var makeList = function() {
             _.read( path.resolve(__dirname, 'list.html') )
                 .split('__DATA__')
                 .join(data)
+                .split('__PROJECTCONF__')
+                .join(JSON.stringify(confHash.project))
         )
 
         process.exit()

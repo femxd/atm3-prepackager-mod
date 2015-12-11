@@ -10,6 +10,7 @@
         <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAADtUExURQAAAENEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ0NEQ+bMkoIAAABOdFJOUwAH5+0M84f3FxL4kBj0/vKOhUECBk2NQAQZ9Q4BNsLuguGJSDmUg8yM60c1RZbPxDgzDyfAys2EHfop7zSKCx/GEfmL9h7pJOUIww3o8ToRooMAAADuSURBVDjL7ZLHdsIwEEVFgjGSbQyh9xIIpFBT6KFDKJn//xwGJBsdw9or3uqOdM9odCRCXMmzVvOJaKUILrxoJw7WP4RQgUuKCULeBb8+CSEmCVGsvwS/WUdol/0GliPBVXsGH2MpFsClvoFNMzmkucHUuC14dZ2u1gDLQQerNKrmZpb0O67yB5BKnGCfB/i/vqrnAUDVz/0eARR6W/DfBTeEgy3gY5nXj7VllpDG72BOfimlnz1JyOwsITxFwxgqivrTlltkLYG05P8pJQcBnVOT7387psAWSU5lLsSdc44XXg7hQjAUinUjxKUcAT0EP1vp32kPAAAAAElFTkSuQmCC">
         <script>
 var data = __DATA__
+var projectconf = __PROJECTCONF__
         </script>
 
         <style>
@@ -49,6 +50,20 @@ var data = __DATA__
           ._dboxf:nth-child(3) > select > option:after {
             content: ' ( ' attr(data-count) ' )';
           }
+          .redirect {
+            position: absolute;
+            width: 80%;
+            top: 85%;
+            left: 10%;
+          }
+          .redirect input,
+          .redirect a {
+              display: block;
+              width: 100%;
+              height: 22px;
+              line-height: 22px;
+              overflow: hidden;
+          }
         </style>
     </head>
     <body>
@@ -67,6 +82,12 @@ var data = __DATA__
           <select v-model="modselecting" v-on:click="click('modselecting')" multiple>
             <option v-for="moditem in mod" v-text="moditem" v-bind:data-count="modcount[moditem]"></option>
           </select>
+        </div>
+        <div class="redirect">
+            <input v-model="htmltogo1prev" v-on:input="htmltogo1fn($event)" type="text">
+            <a v-bind:href="htmltogo1" v-text="htmltogo1" target="_blank"></a>
+            <input v-model="htmltogo2prev" v-on:input="htmltogo2fn($event)" type="text">
+            <a v-bind:href="htmltogo2" v-text="htmltogo2" target="_blank"></a>
         </div>
       </div>
       <script src="https://cdn.bootcss.com/vue/1.0.4/vue.min.js"></script>
@@ -87,6 +108,18 @@ newDataRelation.modhtml = []
 newDataRelation.submod = []
 
 var newData = {}
+
+if (!localStorage.getItem('htmltogo1')) {
+    localStorage.setItem('htmltogo1', projectconf)
+}
+newData.htmltogo1prev = localStorage.getItem('htmltogo1')
+newData.htmltogo1 = newData.htmltogo1prev + '#'
+
+if (!localStorage.getItem('htmltogo2')) {
+    localStorage.setItem('htmltogo2', 'http://wapstatic.kf0309.3g.qq.com/monkeytao/client')
+}
+newData.htmltogo2prev = localStorage.getItem('htmltogo2')
+newData.htmltogo2 = newData.htmltogo2prev + '#'
 
 newData.sub = []
 newData.html = []
@@ -134,7 +167,25 @@ log(newDataRelation)
 var vm = new Vue({
   el: '#panel',
   data: newData,
+  computed: {
+    htmltogo1: function () {
+      return this.htmltogo1prev + (this.htmlselecting[0] || '#')
+    },
+    htmltogo2: function () {
+      return this.htmltogo2prev + (this.htmlselecting[0] || '#')
+    },
+  },
   methods: {
+    htmltogo1fn: function($event) {
+        var v = $event.target.value
+        this.htmltogo1prev = v
+        localStorage.setItem('htmltogo1', v)
+    },
+    htmltogo2fn: function($event) {
+        var v = $event.target.value
+        this.htmltogo2prev = v
+        localStorage.setItem('htmltogo2', v)
+    },
     click: function(from) {
       var resulta = []
       var resultb = []
